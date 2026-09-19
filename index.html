@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Devil Room</title>
+  <meta name="theme-color" content="#0b0a09" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0a09;
+      --fg: #ece6dc;
+      --muted: #9a9186;
+      --subtle: #6f6860;
+      --card: #141210;
+      --accent: #1c1814;
+      --primary: #c4544a;
+      --primary-fg: #1a0f0e;
+      --border: rgba(236, 230, 220, 0.1);
+      --shadow: 0 0 0 1px rgba(236, 230, 220, 0.08);
+      --font: "Outfit", system-ui, sans-serif;
+      --display: "Cormorant Garamond", "Times New Roman", serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      color-scheme: dark;
+    }
+    button, [role="button"] { cursor: pointer; font-family: inherit; }
+    button:disabled { opacity: 0.4; cursor: default; }
+    img { max-width: 100%; }
+    .gate, .app { min-height: 100dvh; }
+    .gate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: radial-gradient(ellipse at top, color-mix(in oklab, var(--primary) 14%, transparent), transparent 52%);
+    }
+    .panel { width: min(100%, 28rem); }
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-family: var(--display);
+      font-size: 2rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .sub {
+      margin: 16px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .card {
+      margin-top: 32px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    label {
+      display: block;
+      margin-top: 16px;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    input, textarea {
+      width: 100%;
+      margin-top: 8px;
+      height: 44px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--fg);
+      padding: 0 12px;
+      font: 0.9rem/1.4 var(--font);
+      box-shadow: var(--shadow);
+      outline: none;
+    }
+    textarea { height: auto; min-height: 44px; max-height: 140px; padding: 10px 12px; resize: none; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row input { flex: 1; }
+    .avatar {
+      width: 64px; height: 64px; border-radius: 16px;
+      object-fit: cover; background: var(--accent);
+      display: grid; place-items: center;
+      font-family: var(--display); font-size: 1.4rem;
+      box-shadow: var(--shadow);
+    }
+    .btn {
+      height: 44px; border: 0; border-radius: 8px;
+      background: var(--primary); color: var(--primary-fg);
+      font-weight: 500; padding: 0 16px;
+    }
+    .btn.ghost { background: transparent; color: var(--fg); }
+    .btn.icon { width: 44px; padding: 0; background: var(--accent); color: var(--fg); }
+    .btn.wide { width: 100%; margin-top: 24px; height: 48px; }
+    .app { display: flex; height: 100dvh; overflow: hidden; }
+    .rail {
+      width: 20rem; flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: var(--card);
+      display: flex; flex-direction: column;
+    }
+    .rail-head { padding: 24px 20px 16px; }
+    .me {
+      margin: 0 16px; padding: 12px; border-radius: 12px;
+      background: var(--accent); display: flex; gap: 12px; align-items: center;
+    }
+    .me .avatar { width: 40px; height: 40px; border-radius: 8px; font-size: 1rem; }
+    .members { flex: 1; overflow: auto; padding: 8px; }
+    .member { display: flex; gap: 12px; align-items: center; padding: 8px 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    header {
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px; border-bottom: 1px solid var(--border);
+    }
+    .thread { flex: 1; overflow: auto; padding: 20px 16px; }
+    .msg { display: flex; gap: 12px; max-width: min(100%, 36rem); margin: 0 0 16px; }
+    .msg.mine { margin-left: auto; flex-direction: row-reverse; }
+    .bubble { background: var(--card); border-radius: 12px; padding: 10px 12px; box-shadow: var(--shadow); }
+    .msg.mine .bubble { background: var(--accent); }
+    .meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; display: flex; gap: 8px; }
+    .bubble p { margin: 0; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; }
+    .bubble img, .bubble video { display: block; max-height: 240px; border-radius: 8px; margin-top: 6px; }
+    .sticker svg { width: 80px; height: 80px; }
+    .composer {
+      border-top: 1px solid var(--border);
+      padding: 12px 12px max(12px, env(safe-area-inset-bottom));
+    }
+    .attach {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border-radius: 12px; padding: 8px; margin-bottom: 12px;
+    }
+    .attach img, .attach video { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+    .menu {
+      position: absolute; bottom: 56px; left: 12px;
+      background: var(--card); border-radius: 12px; padding: 6px;
+      box-shadow: var(--shadow), 0 18px 40px -24px #000;
+      min-width: 12rem; display: none;
+    }
+    .menu.open { display: block; }
+    .menu button {
+      display: flex; width: 100%; height: 44px; align-items: center; gap: 10px;
+      background: none; border: 0; color: var(--fg); padding: 0 12px; border-radius: 8px;
+    }
+    .menu button:hover { background: var(--accent); }
+    .stickers {
+      display: none; position: absolute; right: 12px; bottom: 56px;
+      width: 18rem; background: var(--card); border-radius: 12px; padding: 8px;
+      box-shadow: var(--shadow);
+      grid-template-columns: repeat(4, 1fr); gap: 4px;
+    }
+    .stickers.open { display: grid; }
+    .stickers button { background: none; border: 0; height: 64px; border-radius: 8px; }
+    .stickers button:hover { background: var(--accent); }
+    .hidden { display: none !important; }
+    .hint { font-size: 0.75rem; color: var(--subtle); margin-top: 8px; }
+    @media (max-width: 840px) {
+      .rail { display: none; }
+      .rail.open {
+        display: flex; position: fixed; inset: 0 auto 0 0; z-index: 20; width: min(100%, 20rem);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section id="gate" class="gate">
+    <div class="panel">
+      <div class="brand">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="24" cy="24" r="18" stroke="#c4544a" stroke-width="1.5"/>
+          <path d="M16 30c1.2-8 4.8-13 8-16 3.2 3 6.8 8 8 16" stroke="#c4544a" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M18 16c-2.5-4-5.5-6-8-6M30 16c2.5-4 5.5-6 8-6" stroke="#c4544a" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Devil Room
+      </div>
+      <p class="sub">Lounge anonim. Pilih samaran, pasang avatar, lalu masuk ke ruangan.</p>
+      <div class="card">
+        <div class="row">
+          <div id="gateAvatar" class="avatar">S</div>
+          <div>
+            <div class="hint" style="margin:0">Samaran</div>
+            <strong id="gateNamePreview" style="font-family:var(--display);font-size:1.5rem;font-weight:500">Silent Veil</strong>
+          </div>
+        </div>
+        <label for="alias">Nama samaran</label>
+        <div class="row">
+          <input id="alias" maxlength="24" value="Silent Veil" />
+          <button class="btn icon" type="button" id="shuffle" aria-label="Acak nama">↻</button>
+        </div>
+        <label for="avatar">Avatar URL</label>
+        <input id="avatar" placeholder="https://…" />
+        <p class="hint">Unggah foto lewat tombol di bawah, atau tempel tautan gambar. Identitas tersimpan di perangkat ini.</p>
+        <input id="avatarFile" type="file" accept="image/*" class="hidden" />
+        <button class="btn" type="button" id="avatarPick" style="margin-top:12px;background:var(--accent);color:var(--fg)">Pilih foto avatar</button>
+        <button class="btn wide" type="button" id="enter">Masuk ruangan</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="app" class="app hidden">
+    <aside class="rail" id="rail">
+      <div class="rail-head">
+        <div class="brand" style="justify-content:flex-start;font-size:1.1rem">Devil Room</div>
+        <p class="hint">Lounge anonim</p>
+      </div>
+      <div class="me">
+        <div id="meAvatar" class="avatar">S</div>
+        <div>
+          <div id="meName">Silent Veil</div>
+          <div class="hint" style="margin:0;display:flex;align-items:center;gap:6px"><span class="dot"></span> Daring</div>
+        </div>
+      </div>
+      <div class="members" id="members"></div>
+      <div style="padding:16px">
+        <button class="btn ghost" type="button" id="leave">Ganti samaran</button>
+      </div>
+    </aside>
+    <div class="main">
+      <header>
+        <button class="btn icon" type="button" id="openRail" aria-label="Anggota">☰</button>
+        <span style="font-family:var(--display);letter-spacing:.12em;text-transform:uppercase">Percakapan lounge</span>
+        <span class="hint" id="onlineCount">1 daring</span>
+      </header>
+      <div class="thread" id="thread"></div>
+      <form class="composer" id="composer">
+        <div id="preview" class="attach hidden"></div>
+        <div class="row" style="position:relative">
+          <button class="btn icon" type="button" id="plus" aria-label="Lampirkan">+</button>
+          <div class="menu" id="menu">
+            <button type="button" data-accept="image/*">Foto</button>
+            <button type="button" data-accept="video/*">Video</button>
+            <button type="button" data-accept="image/gif">GIF</button>
+            <button type="button" id="gifLink">Tautan GIF</button>
+          </div>
+          <textarea id="body" rows="1" placeholder="Tulis di lounge…" maxlength="1600"></textarea>
+          <button class="btn icon" type="button" id="stickerBtn" aria-label="Stiker">✧</button>
+          <div class="stickers" id="stickers"></div>
+          <button class="btn icon" type="submit" id="send" aria-label="Kirim" style="background:var(--primary);color:var(--primary-fg)">➤</button>
+        </div>
+        <input id="file" type="file" class="hidden" />
+      </form>
+    </div>
+  </section>
+
+  <script>
+    const ADJ = ["Silent","Ashen","Velvet","Hollow","Night","Ember","Pale","Veiled","Quiet","Iron","Dusk","Ivory"];
+    const NOUN = ["Horn","Veil","Rose","Crow","Wick","Mask","Key","Thorn","Ash","Moon","Lantern","Cloak"];
+    const STICKERS = ["ember","horn","veil","rose","moon","crow","wick","key","thorn","mask","night","ash"];
+    const KEY = "devil-room-html";
+    const MAX = 25 * 1024 * 1024;
+
+    const $ = (id) => document.getElementById(id);
+    const store = JSON.parse(localStorage.getItem(KEY) || "null") || {
+      guestId: "veil_" + crypto.randomUUID(),
+      alias: "Silent Veil",
+      avatarUrl: "",
+      entered: false,
+      messages: [
+        { id: 1, guestId: "house", alias: "The House", avatarUrl: "", body: "Lounge terbuka. Pakai samaran, bukan nama asli.", createdAt: Date.now() - 60000 },
+        { id: 2, guestId: "house", alias: "The House", avatarUrl: "", body: "Kirim foto, klip, GIF, atau stiker. Lampiran bisa dibatalkan sebelum terkirim.", createdAt: Date.now() - 30000 }
+      ]
+    };
+
+    let attachment = null;
+
+    function save() { localStorage.setItem(KEY, JSON.stringify(store)); }
+    function randomAlias() {
+      const n = crypto.getRandomValues(new Uint32Array(1))[0];
+      return ADJ[n % ADJ.length] + " " + NOUN[Math.floor(n / ADJ.length) % NOUN.length];
+    }
+    function initial(name) { return (name.trim()[0] || "V").toUpperCase(); }
+    function avatarEl(target, name, src) {
+      if (src) {
+        target.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = src; img.alt = ""; img.className = "avatar";
+        img.style.width = target.style.width || "";
+        target.replaceWith(img);
+        img.id = target.id;
+        return;
+      }
+      target.textContent = initial(name);
+      if (target.tagName === "IMG") {
+        const div = document.createElement("div");
+        div.id = target.id; div.className = "avatar"; div.textContent = initial(name);
+        target.replaceWith(div);
+      }
+    }
+
+    function renderGate() {
+      $("alias").value = store.alias;
+      $("avatar").value = store.avatarUrl.startsWith("data:") ? "" : store.avatarUrl;
+      $("gateNamePreview").textContent = store.alias;
+      const ga = $("gateAvatar");
+      if (store.avatarUrl) {
+        const img = document.createElement("img");
+        img.id = "gateAvatar";
+        img.className = "avatar";
+        img.alt = "";
+        img.src = store.avatarUrl;
+        ga.replaceWith(img);
+      } else {
+        if (ga.tagName === "IMG") ga.outerHTML = `<div id="gateAvatar" class="avatar">${initial(store.alias)}</div>`;
+        else ga.textContent = initial(store.alias);
+      }
+    }
+
+    function stickerSvg(id) {
+      return `<svg viewBox="0 0 64 64" fill="none"><rect x="4" y="4" width="56" height="56" rx="16" fill="#1c1814" stroke="rgba(236,230,220,.1)"/><circle cx="32" cy="32" r="10" stroke="#c4544a" stroke-width="1.8"/><text x="32" y="36" text-anchor="middle" fill="#ece6dc" font-size="8" font-family="serif">${id[0].toUpperCase()}</text></svg>`;
+    }
+
+    function renderThread() {
+      const thread = $("thread");
+      thread.innerHTML = store.messages.map((m) => {
+        const mine = m.guestId === store.guestId;
+        const media = m.mediaKind === "video"
+          ? `<video src="${m.mediaUrl}" controls></video>`
+          : m.mediaUrl ? `<img src="${m.mediaUrl}" alt="" />` : "";
+        const sticker = m.stickerId ? `<div class="sticker">${stickerSvg(m.stickerId)}</div>` : "";
+        const av = m.avatarUrl
+          ? `<img class="avatar" style="width:32px;height:32px;border-radius:8px" src="${m.avatarUrl}" alt="" />`
+          : `<div class="avatar" style="width:32px;height:32px;border-radius:8px;font-size:.9rem">${initial(m.alias)}</div>`;
+        return `<article class="msg ${mine ? "mine" : ""}">${av}<div><div class="meta"><span>${escapeHtml(m.alias)}</span></div><div class="bubble">${sticker}${media}${m.body ? `<p>${escapeHtml(m.body)}</p>` : ""}</div></div></article>`;
+      }).join("");
+      thread.scrollTop = thread.scrollHeight;
+      $("members").innerHTML = `<div class="member"><div class="avatar" style="width:32px;height:32px;border-radius:8px;font-size:.9rem">${initial(store.alias)}</div><div>${escapeHtml(store.alias)}<div class="hint" style="margin:0">Kamu</div></div></div>`;
+    }
+
+    function escapeHtml(s) {
+      const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+      return String(s).replace(/[&<>"']/g, (c) => map[c]);
+    }
+
+    function showApp() {
+      $("gate").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      $("meName").textContent = store.alias;
+      const me = $("meAvatar");
+      if (store.avatarUrl) me.outerHTML = `<img id="meAvatar" class="avatar" src="${store.avatarUrl}" alt="" />`;
+      else { if (me.tagName === "IMG") me.outerHTML = `<div id="meAvatar" class="avatar">${initial(store.alias)}</div>`; else me.textContent = initial(store.alias); }
+      renderThread();
+    }
+
+    function enter() {
+      const alias = $("alias").value.trim();
+      if (alias.length < 2) return alert("Samaran minimal 2 huruf.");
+      store.alias = alias;
+      store.avatarUrl = $("avatar").value.trim() || store.avatarUrl;
+      store.entered = true;
+      if (!store.guestId.startsWith("veil_")) store.guestId = "veil_" + crypto.randomUUID();
+      save();
+      showApp();
+    }
+
+    $("alias").addEventListener("input", (e) => {
+      store.alias = e.target.value;
+      $("gateNamePreview").textContent = store.alias || "—";
+      const el = $("gateAvatar");
+      if (el.tagName !== "IMG") el.textContent = initial(store.alias);
+    });
+    $("shuffle").onclick = () => {
+      store.alias = randomAlias();
+      $("alias").value = store.alias;
+      $("gateNamePreview").textContent = store.alias;
+      const el = $("gateAvatar");
+      if (el.tagName !== "IMG") el.textContent = initial(store.alias);
+    };
+    $("avatarPick").onclick = () => $("avatarFile").click();
+    $("avatarFile").onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > MAX) return alert("Maksimum 25 MB.");
+      store.avatarUrl = await compress(file, 256);
+      $("gateAvatar").outerHTML = `<img id="gateAvatar" class="avatar" src="${store.avatarUrl}" alt="" />`;
+    };
+    $("enter").onclick = enter;
+    $("alias").addEventListener("keydown", (e) => { if (e.key === "Enter") enter(); });
+    $("leave").onclick = () => {
+      store.entered = false;
+      store.alias = randomAlias();
+      store.avatarUrl = "";
+      store.guestId = "veil_" + crypto.randomUUID();
+      save();
+      location.reload();
+    };
+    $("openRail").onclick = () => $("rail").classList.toggle("open");
+
+    $("plus").onclick = () => { $("menu").classList.toggle("open"); $("stickers").classList.remove("open"); };
+    $("stickerBtn").onclick = () => { $("stickers").classList.toggle("open"); $("menu").classList.remove("open"); };
+    $("menu").onclick = (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      $("menu").classList.remove("open");
+      if (btn.id === "gifLink") {
+        const url = prompt("Tempel tautan GIF (https://…)");
+        if (url && /^https?:\/\//.test(url)) setAttach({ kind: "gif", url, name: "GIF" });
+        return;
+      }
+      $("file").accept = btn.dataset.accept;
+      $("file").click();
+    };
+
+    $("file").onchange = async (e) => {
+      const file = e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      if (file.size > MAX) return alert("Maksimum unggah 25 MB.");
+      try {
+        if (file.type === "image/gif") setAttach({ kind: "gif", url: await read(file), name: file.name });
+        else if (file.type.startsWith("image/")) setAttach({ kind: "photo", url: await compress(file, 1280), name: file.name });
+        else if (file.type.startsWith("video/")) {
+          if (file.size > 2.4e6) return alert("Klip harus di bawah 2.4 MB agar bisa disimpan di berkas ini.");
+          setAttach({ kind: "video", url: await read(file), name: file.name });
+        } else alert("Hanya foto, video, dan GIF.");
+      } catch (err) { alert(err.message || "Gagal lampiran."); }
+    };
+
+    function setAttach(a) {
+      attachment = a;
+      const box = $("preview");
+      box.classList.remove("hidden");
+      const media = a.kind === "video" ? `<video src="${a.url}" muted></video>` : `<img src="${a.url}" alt="" />`;
+      box.innerHTML = `${media}<div style="flex:1"><div>${escapeHtml(a.name)}</div><div class="hint">${a.kind}</div></div><button class="btn icon" type="button" id="clearAttach" aria-label="Hapus lampiran">✕</button>`;
+      $("clearAttach").onclick = () => { attachment = null; box.classList.add("hidden"); box.innerHTML = ""; };
+    }
+
+    document.body.addEventListener("dragover", (e) => e.preventDefault());
+    document.body.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      $("file").files = dt.files;
+      $("file").dispatchEvent(new Event("change"));
+    });
+
+    $("stickers").innerHTML = STICKERS.map((id) => `<button type="button" data-id="${id}" aria-label="${id}">${stickerSvg(id)}</button>`).join("");
+    $("stickers").onclick = (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      send({ body: "", stickerId: btn.dataset.id });
+      $("stickers").classList.remove("open");
+    };
+
+    $("composer").onsubmit = (e) => { e.preventDefault(); send({ body: $("body").value.trim(), stickerId: null }); };
+    $("body").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send({ body: $("body").value.trim(), stickerId: null }); }
+    });
+
+    function send({ body, stickerId }) {
+      if (!body && !attachment && !stickerId) return;
+      store.messages.push({
+        id: Date.now(),
+        guestId: store.guestId,
+        alias: store.alias,
+        avatarUrl: store.avatarUrl,
+        body,
+        mediaKind: stickerId ? "sticker" : attachment ? attachment.kind : null,
+        mediaUrl: stickerId ? null : attachment ? attachment.url : null,
+        stickerId,
+        createdAt: Date.now()
+      });
+      if (store.messages.length > 120) store.messages = store.messages.slice(-120);
+      $("body").value = "";
+      attachment = null;
+      $("preview").classList.add("hidden");
+      $("preview").innerHTML = "";
+      save();
+      renderThread();
+    }
+
+    function read(file) {
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = () => rej(new Error("Gagal membaca berkas."));
+        r.readAsDataURL(file);
+      });
+    }
+    async function compress(file, maxEdge) {
+      const bmp = await createImageBitmap(file);
+      const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(bmp.width * scale));
+      c.height = Math.max(1, Math.round(bmp.height * scale));
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      bmp.close();
+      return c.toDataURL("image/jpeg", 0.78);
+    }
+
+    renderGate();
+    if (store.entered) showApp();
+  </script>
+</body>
+</html>
