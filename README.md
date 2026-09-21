@@ -10,7 +10,7 @@ The file [`index.html`](./index.html) is a full lounge in one file. Download it,
 2. Source: **Deploy from a branch**
 3. Branch: `main` / root
 
-Then it lives at https://rizkiyoumain.github.io/devil-room/
+Then it lives at https://github.com
 
 ## What is inside
 
